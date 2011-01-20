@@ -1,0 +1,12 @@
+An idea to restict for example some parts in a fluid template based on ACLs
+
+<acl>
+	<rule>ObjectA > new</rule>
+	<rule>ObjectC > seeIt</rule>
+	<content>
+		Restricted content
+	</content>
+	<contentIfNotAllowed>
+		Your are not allowe to to see it
+	</contentIfNotAllowed>
+</acl>
