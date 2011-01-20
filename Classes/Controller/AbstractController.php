@@ -4,7 +4,7 @@ abstract class Tx_Rbac_Controller_AbstractController extends Tx_Extbase_MVC_Cont
 	/**
 	* Holds an instance of rbac access controll service
 	*
-	* @var Tx_Rbac_Domain_AccessControllService
+	* @var Tx_Rbac_AccessControlServiceInterface
 	*/
 	protected $rbacAccessControllService;
 
@@ -22,7 +22,7 @@ abstract class Tx_Rbac_Controller_AbstractController extends Tx_Extbase_MVC_Cont
 	*/
 	protected function initAccessControllService() {
 		// TODO put this into factory
-		$accessControllService = new Tx_Rbac_Domain_AccessControllService();
+		$accessControllService = new Tx_Rbac_ZendAccessControllService();
 		$this->rbacAccessControllService = $accessControllService;
 	}
 
@@ -38,7 +38,7 @@ abstract class Tx_Rbac_Controller_AbstractController extends Tx_Extbase_MVC_Cont
 		$action = $this->actionMethodName;
 		$methodTags = $this->reflectionService->getMethodTagsValues($controller, $action);
 
-		if (array_key_exists('rbacNeedsAccess', $methodTags)) {
+		if (array_key_exists('rbacRule', $methodTags)) {
 		    	
 			if ($this->feUser) {	
 	    	
@@ -50,9 +50,7 @@ abstract class Tx_Rbac_Controller_AbstractController extends Tx_Extbase_MVC_Cont
 				// @rbacRule ObjectA > new,edit,delete
 				$isAllowed = TRUE
 				while (array_pop($methodTags['rbacRule'])=$rbacRule && $isAllowed == TRUE) {
-					$rbacObject = $this->rbacAccessControllService->getRbacObjectFromRule();
-					$rbacActions = $this->rbacAccessControllService->getRbacActionsFromRule();
-					$isAllowed = $this->rbacAccessControllService->hasAccess($this->feUser, $rbacObject, $rbacActions);
+					$isAllowed = $this->rbacAccessControllService->hasAccess($this->feUser, $rbacRule);
 				}
 
 				if (count($methodTags['rbacRule'])) {
