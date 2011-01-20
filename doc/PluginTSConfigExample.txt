@@ -1,0 +1,37 @@
+plugins.tx_myplugin.rbac.roles {
+	admin {
+		ObjectA {
+			actions = action1,action2
+			allowed = 1
+		}
+
+		// All actions for ObjectB
+		ObjectB = *
+
+		// CommonAction is a reserved word in roles
+		// actions for all objects
+		CommonActions {
+			allow = action1,action2
+			deny = action3
+		}
+		
+		parentRoles = 
+
+	}
+
+	editor {
+		ObjectB {
+			actions =  *
+		}
+		// values separated by ','
+		parentRoles = guest
+	}
+
+	guest {
+		ObjectA {
+			actions = action2
+		}
+	}
+
+}
+

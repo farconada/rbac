@@ -23,6 +23,10 @@ class Tx_Rbac_Service_ZendAccessControlService implements Tx_Rbac_AccessControlS
 		public function hasAccess($feUser, $rbacRule) {
 
 		}
+
+		protected function getUserAcl($feUser){
+
+		}
 }
 
 ?>
