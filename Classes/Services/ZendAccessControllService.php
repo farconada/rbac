@@ -1,6 +1,12 @@
 <?php
 
 class Tx_Rbac_Service_ZendAccessControlService implements Tx_Rbac_AccessControlServiceInterface {
+		/*
+		* @var Tx_Extbase_Domain_Repository_FrontendUserRepository
+		*/
+		protected $feUser;
+
+		protected $userAcl;
 
 		/**
 		* Gets a string with the resource object
@@ -31,14 +37,46 @@ class Tx_Rbac_Service_ZendAccessControlService implements Tx_Rbac_AccessControlS
 
 			return $actionsResult;
 		}
-
+		
+		/**
+		* Retrurns true or false depending if a user is allowed to access the object's actions
+		* @param Tx_Extbase_Domain_Repository_FrontendUserRepository $feUser FrontEnd user
+		* @param mixed $rbacRule "ObjectA > new,edit,delete", could be an array of rules
+		*
+		**/
 		public function hasAccess($feUser, $rbacRule) {
+			if(!get_class($feUser) == 'Tx_Extbase_Domain_Repository_FrontendUserRepository'){
+				return FALSE;
+			}
+			if(!is_array($rbacRule)){
+				// always think that you have an array of rules
+				$rbacRule = array($rbacRule);		
+			}
+			$this->setFeUser($feUser);
+			$this->userAcl = getUserAcl();
+			return $this->evalAllRbacRules($rbacRule);
+		}
+
+		protected function getUserAcl(){
+			
+		}
+		
+		protected function evalOneRbacRule($rbacRule){
 
 		}
 
-		protected function getUserAcl($feUser){
-
+		protected function evalAllRbacRules($rbacRules){
+			$isAllowed = TRUE;
+			while ($rbacRule=array_pop($rbacRules) && $isAllowed == TRUE) {
+				$isAllowed = $this->evalOneRbacRule($rbacRule);
+			}
+			return $isAllowed;
 		}
+		
+		protected function setFeUser($feUser) {
+			$this->feUser = $feUser;
+		}
+
 }
 
 ?>

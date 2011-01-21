@@ -41,23 +41,14 @@ abstract class Tx_Rbac_Controller_AbstractController extends Tx_Extbase_MVC_Cont
 		if (array_key_exists('rbacRule', $methodTags)) {
 		    	
 			if ($this->feUser) {	
-	    	
-			    	$query = t3lib_div::makeInstance(Tx_Rbac_Domain_Repository_UserRepository)->createQuery();
-			    	$query->getQuerySettings()->setRespectStoragePage(FALSE);
-			    	$query->matching($query->equals('feUser', $this->feUser->getUid()));
-			    	$rbacUser = $query->execute();
-			    	
+	    			    	
 				// @rbacRule ObjectA > new,edit,delete
-				$isAllowed = TRUE
-				while (array_pop($methodTags['rbacRule'])=$rbacRule && $isAllowed == TRUE) {
-					$isAllowed = $this->rbacAccessControllService->hasAccess($this->feUser, $rbacRule);
-				}
-
-				if (count($methodTags['rbacRule'])) {
-					// Some rule checked as Not Allowed
+				$isAllowed = $this->rbacAccessControllService->hasAccess($this->feUser, $methodTags['rbacRule']);
+				if(!$isAllowed) {
 					$this->flashMessages->add('Access denied! You do not have the privileges for this function.');
 					$this->accessDeniedAction();
 				}
+				
 
 			} else {
 				$this->flashMessages->add('Access denied - You are not logged in!');
