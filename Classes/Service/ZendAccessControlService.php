@@ -2,7 +2,7 @@
 
 class Tx_Rbac_Service_ZendAccessControlService implements Tx_Rbac_Interface_AccessControlServiceInterface {
 		/*
-		* @var Tx_Extbase_Domain_Repository_FrontendUserRepository
+		* @var tslib_feUserAuth
 		*/
 		protected $feUser;
 
@@ -56,11 +56,8 @@ class Tx_Rbac_Service_ZendAccessControlService implements Tx_Rbac_Interface_Acce
 		}
 
 		protected function getUserAcl(){
-			$ts = NULL;
-			if($GLOBALS['TSFE']->fe_user) {
-				$ts = $GLOBALS['TSFE']->fe_user->getUserTSconf();
-			}
-			t3lib_div::debug($ts);
+			$ts = $this->feUser->getUserTSconf();
+			//t3lib_div::debug($ts);
 		}
 
 		protected function evalOneRbacRule($rbacRule){
@@ -79,8 +76,8 @@ class Tx_Rbac_Service_ZendAccessControlService implements Tx_Rbac_Interface_Acce
 		}
 
 		protected function setFeUser($feUser) {
-			if(!get_class($feUser) == 'Tx_Extbase_Domain_Repository_FrontendUserRepository'){
-				throw new Tx_Rbac_Exception_AccessControlServiceException('error: is not valid FE user of type Tx_Extbase_Domain_Repository_FrontendUserRepository');
+			if(!(get_class($feUser) == 'tslib_feUserAuth') || !($feUser->user['uid'] > 0)){
+				throw new Tx_Rbac_Exception_AccessControlServiceException('error: is not valid FE user of type tslib_feUserAuth');
 			}
 			$this->feUser = $feUser;
 		}

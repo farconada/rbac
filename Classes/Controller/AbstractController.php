@@ -33,15 +33,14 @@ abstract class Tx_Rbac_Controller_AbstractController extends Tx_Extbase_MVC_Cont
 		// TODO refactor me!!!
 
 		$this->preInitializeAction();
-		$this->feUser = $this->getLoggedInUserObject();
 		$controller = $this->request->getControllerObjectName();
 		$action = $this->actionMethodName;
 		$methodTags = $this->reflectionService->getMethodTagsValues($controller, $action);
 
 		if (array_key_exists('rbacRule', $methodTags)) {
-			if ($this->feUser) {
+			if ($GLOBALS['TSFE']->fe_user->user['uid'] > 0) {
 				// @rbacRule ObjectA > new,edit,delete
-				$isAllowed = $this->rbacAccessControlService->hasAccess($this->feUser, $methodTags['rbacRule']);
+				$isAllowed = $this->rbacAccessControlService->hasAccess($GLOBALS['TSFE']->fe_user, $methodTags['rbacRule']);
 				if(!$isAllowed) {
 					$this->flashMessages->add('Access denied! You do not have the privileges for this function.');
 					$this->accessDeniedAction();
@@ -74,22 +73,6 @@ abstract class Tx_Rbac_Controller_AbstractController extends Tx_Extbase_MVC_Cont
 	*/
 	protected function postInitializeAction() {}
 
-	/**
-	* Returns a fe user domain object for a currently logged in user
-	* or NULL if no user is logged in.
-	*
-	* @return Tx_Extbase_Domain_Model_FrontendUser  FE user object
-	*/
-	protected function getLoggedInUserObject() {
-		$feUserUid = $GLOBALS['TSFE']->fe_user->user['uid'];
-		if ($feUserUid > 0) {
-		    $feUserRepository = t3lib_div::makeInstance('Tx_Extbase_Domain_Repository_FrontendUserRepository'); /* @var $feUserRepository Tx_Extbase_Domain_Repository_FrontendUserRepository */
-		    $feUser = $feUserRepository->findByUid($feUserUid);
-		    return $feUser;
-		} else {
-		    return NULL;
-		}
-   	}
 
 }
 ?>
