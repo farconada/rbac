@@ -1,10 +1,10 @@
-plugins.tx_myplugin.rbac.roles {
+plugins.tx_myplugin.settings.rbac.roles {
 	custonRole {
 		ObjectA {
 					actions = action1
 					allowed = 0
 				}
 	}
-}	
+}
 
-plugins.tx_myplugin.rbac.applyRoles = guest, editor, customRole
+plugins.tx_myplugin.settings.rbac.applyRoles = guest, editor, customRole

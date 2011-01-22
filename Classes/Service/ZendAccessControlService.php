@@ -1,4 +1,8 @@
 <?php
+require 'Zend/Acl.php';
+require 'Zend/Acl/Role.php';
+require 'Zend/Acl/Resource.php';
+require 'Zend/Acl/Exception.php';
 
 class Tx_Rbac_Service_ZendAccessControlService implements Tx_Rbac_Interface_AccessControlServiceInterface {
 		/*
@@ -7,6 +11,10 @@ class Tx_Rbac_Service_ZendAccessControlService implements Tx_Rbac_Interface_Acce
 		protected $feUser;
 
 		protected $userAcl;
+
+		protected $extensionName;
+
+		protected $pluginSettings;
 
 		/**
 		* Gets a string with the resource object
@@ -55,11 +63,69 @@ class Tx_Rbac_Service_ZendAccessControlService implements Tx_Rbac_Interface_Acce
 			return $this->evalAllRbacRules($rbacRule);
 		}
 
-		protected function getUserAcl(){
+		private function getUserRolesFromTS() {
 			$userTs = $this->feUser->getUserTSconf();
-			//t3lib_div::debug($ts);
+			if(isset($userTs['plugin.']['tx_'.$this->extensionName.'.']['settings.']['rbac.']['roles.'])){
+				return Tx_Extbase_Utility_TypoScript::convertTypoScriptArrayToPlainArray($userTs['plugin.']['tx_'.$this->extensionName.'.']['settings.']['rbac.']['roles.']);
+			} else {
+				return array();
+			}
+
 		}
 
+		private function getPluginRolesFromTS(){
+			if(isset($this->pluginSettings['rbac']['roles'])) {
+				return $this->pluginSettings['rbac']['roles'];
+			} else {
+				return array();
+			}
+		}
+
+		protected function getUserAcl(){
+			$acl = new Zend_Acl();
+			$roles = Tx_Extbase_Utility_Arrays::arrayMergeRecursiveOverrule($this->getPluginRolesFromTS(), $this->getUserRolesFromTS());
+			t3lib_div::debug($roles);
+			foreach ($roles as $roleName => $roleValues) {
+				try {
+					// create the roles
+					$acl->addRole(strtolower(trim($roleName)),Tx_Extbase_Utility_Arrays::trimExplode(',', $roleValues['parentRoles'],TRUE));
+					foreach($roleValues as $ruleObject => $ruleValues){
+						// Common actions for all resource objects
+						if (strtolower(trim($ruleObject)) == 'commonactions') {
+							if (isset($ruleValues['allow'])) {
+								$actions = Tx_Extbase_Utility_Arrays::trimExplode(',', $ruleValues['allow'],TRUE);
+								$acl->allow(strtolower(trim($roleName)),null,$actions);
+							}
+							if (isset($ruleValues['deny'])) {
+								$actions = Tx_Extbase_Utility_Arrays::trimExplode(',', $ruleValues['deny'],TRUE);
+								$acl->deny(strtolower(trim($roleName)),null,$actions);
+							}
+						} else {
+							// actions for selected resource Objects
+							$actions = Tx_Extbase_Utility_Arrays::trimExplode(',', $ruleValues['actions'],TRUE);
+							if(!isset($ruleValues['allowed']) || $ruleValues['allowed']){
+								$acl->allow(strtolower(trim($roleName)),strtolower(trim($ruleObject)),$actions);
+							} else {
+								$acl->deny(strtolower(trim($roleName)),strtolower(trim($ruleObject)),$actions);
+							}
+						}
+					}
+				} catch(Zend_Acl_Role_Registry_Exception $exception) {
+					throw new Tx_Rbac_Exception_AccessControlServiceException($exception->getMessage());
+				}
+
+				return $acl;
+			}
+
+		}
+
+		public function setExtensionName($extensionName){
+			$this->extensionName = strtolower($extensionName);
+		}
+
+		public function setPluginSettings($settings){
+			$this->pluginSettings = $settings;
+		}
 		protected function evalOneRbacRule($rbacRule){
 
 		}

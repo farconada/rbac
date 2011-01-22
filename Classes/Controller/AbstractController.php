@@ -33,6 +33,7 @@ abstract class Tx_Rbac_Controller_AbstractController extends Tx_Extbase_MVC_Cont
 		// TODO refactor me!!!
 
 		$this->preInitializeAction();
+
 		$controller = $this->request->getControllerObjectName();
 		$action = $this->actionMethodName;
 		$methodTags = $this->reflectionService->getMethodTagsValues($controller, $action);
@@ -40,6 +41,8 @@ abstract class Tx_Rbac_Controller_AbstractController extends Tx_Extbase_MVC_Cont
 		if (array_key_exists('rbacRule', $methodTags)) {
 			if ($GLOBALS['TSFE']->fe_user->user['uid'] > 0) {
 				// @rbacRule ObjectA > new,edit,delete
+				$this->rbacAccessControlService->setExtensionName($this->request->getControllerExtensionName());
+				$this->rbacAccessControlService->setPluginSettings($this->settings);
 				$isAllowed = $this->rbacAccessControlService->hasAccess($GLOBALS['TSFE']->fe_user, $methodTags['rbacRule']);
 				if(!$isAllowed) {
 					$this->flashMessages->add('Access denied! You do not have the privileges for this function.');

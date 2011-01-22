@@ -1,4 +1,4 @@
-plugins.tx_myplugin.rbac.roles {
+plugins.tx_myplugin.settings.rbac.roles {
 	admin {
 		ObjectA {
 			actions = action1,action2
@@ -14,8 +14,8 @@ plugins.tx_myplugin.rbac.roles {
 			allow = action1,action2
 			deny = action3
 		}
-		
-		parentRoles = 
+
+		parentRoles =
 
 	}
 
