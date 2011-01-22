@@ -39,9 +39,7 @@ abstract class Tx_Rbac_Controller_AbstractController extends Tx_Extbase_MVC_Cont
 		$methodTags = $this->reflectionService->getMethodTagsValues($controller, $action);
 
 		if (array_key_exists('rbacRule', $methodTags)) {
-
 			if ($this->feUser) {
-
 				// @rbacRule ObjectA > new,edit,delete
 				$isAllowed = $this->rbacAccessControlService->hasAccess($this->feUser, $methodTags['rbacRule']);
 				if(!$isAllowed) {

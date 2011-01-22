@@ -1,6 +1,6 @@
 <?php
 
-class Tx_Rbac_Service_ZendAccessControlService implements Tx_Rbac_Interfaces_AccessControlServiceInterface {
+class Tx_Rbac_Service_ZendAccessControlService implements Tx_Rbac_Interface_AccessControlServiceInterface {
 		/*
 		* @var Tx_Extbase_Domain_Repository_FrontendUserRepository
 		*/
@@ -50,7 +50,7 @@ class Tx_Rbac_Service_ZendAccessControlService implements Tx_Rbac_Interfaces_Acc
 				$rbacRule = array($rbacRule);
 			}
 			$this->setFeUser($feUser);
-			$this->userAcl = getUserAcl();
+			$this->userAcl = $this->getUserAcl();
 
 			return $this->evalAllRbacRules($rbacRule);
 		}
@@ -69,9 +69,9 @@ class Tx_Rbac_Service_ZendAccessControlService implements Tx_Rbac_Interfaces_Acc
 
 		protected function evalAllRbacRules($rbacRules){
 			$isAllowed = TRUE;
-			while ($rbacRule=array_pop($rbacRules) && $isAllowed == TRUE) {
-				if( !$this->isValidRuleSyntax($rule)) {
-					throw new Tx_Rbac_AccessControlServiceException('error: is not valid rule syntax');
+			while (($rbacRule=array_pop($rbacRules)) && $isAllowed == TRUE) {
+				if( !$this->isValidRuleSyntax($rbacRule)) {
+					throw new Tx_Rbac_Exception_AccessControlServiceException('RBAC error: is not valid rule syntax: '. $rbacRule);
 				}
 				$isAllowed = $this->evalOneRbacRule($rbacRule);
 			}
@@ -80,7 +80,7 @@ class Tx_Rbac_Service_ZendAccessControlService implements Tx_Rbac_Interfaces_Acc
 
 		protected function setFeUser($feUser) {
 			if(!get_class($feUser) == 'Tx_Extbase_Domain_Repository_FrontendUserRepository'){
-				throw new Tx_Rbac_AccessControlServiceException('error: is not valid FE user of type Tx_Extbase_Domain_Repository_FrontendUserRepository');
+				throw new Tx_Rbac_Exception_AccessControlServiceException('error: is not valid FE user of type Tx_Extbase_Domain_Repository_FrontendUserRepository');
 			}
 			$this->feUser = $feUser;
 		}
