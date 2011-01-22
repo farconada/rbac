@@ -84,7 +84,7 @@ class Tx_Rbac_Service_ZendAccessControlService implements Tx_Rbac_Interface_Acce
 		protected function getUserAcl(){
 			$acl = new Zend_Acl();
 			$roles = Tx_Extbase_Utility_Arrays::arrayMergeRecursiveOverrule($this->getPluginRolesFromTS(), $this->getUserRolesFromTS());
-			t3lib_div::debug($roles);
+			//t3lib_div::debug($roles);
 			foreach ($roles as $roleName => $roleValues) {
 				try {
 					// create the roles
@@ -95,27 +95,38 @@ class Tx_Rbac_Service_ZendAccessControlService implements Tx_Rbac_Interface_Acce
 							if (isset($ruleValues['allow'])) {
 								$actions = Tx_Extbase_Utility_Arrays::trimExplode(',', $ruleValues['allow'],TRUE);
 								$acl->allow(strtolower(trim($roleName)),null,$actions);
+								//t3lib_div::debug('allow role: '.strtolower(trim($roleName)).' resource: '. null .' actions: '.implode(',', $actions)."\n");echo "<br />";
 							}
 							if (isset($ruleValues['deny'])) {
 								$actions = Tx_Extbase_Utility_Arrays::trimExplode(',', $ruleValues['deny'],TRUE);
 								$acl->deny(strtolower(trim($roleName)),null,$actions);
+								//t3lib_div::debug('deny role: '.strtolower(trim($roleName)).' resource: '. null .' actions: '.implode(',', $actions)."\n");echo "<br />";
 							}
 						} else {
-							// actions for selected resource Objects
-							$actions = Tx_Extbase_Utility_Arrays::trimExplode(',', $ruleValues['actions'],TRUE);
-							if(!isset($ruleValues['allowed']) || $ruleValues['allowed']){
-								$acl->allow(strtolower(trim($roleName)),strtolower(trim($ruleObject)),$actions);
-							} else {
-								$acl->deny(strtolower(trim($roleName)),strtolower(trim($ruleObject)),$actions);
+							if(!(strtolower(trim($ruleObject)) == 'parentroles')) {
+								try {
+									$acl->addResource(strtolower(trim($ruleObject)));
+								} catch (Zend_Acl_Exception $exception) {
+									// If Resource already exists then ignore
+								}
+								// actions for selected resource Objects
+								$actions = Tx_Extbase_Utility_Arrays::trimExplode(',', $ruleValues['actions'],TRUE);
+								if(!isset($ruleValues['allowed']) || $ruleValues['allowed']){
+									$acl->allow(strtolower(trim($roleName)),strtolower(trim($ruleObject)),$actions);
+									//t3lib_div::debug('allow role: '.strtolower(trim($roleName)).' resource: '. strtolower(trim($ruleObject)) .' actions: '.implode(',', $actions)."\n");echo "<br />";
+								} else {
+									$acl->deny(strtolower(trim($roleName)),strtolower(trim($ruleObject)),$actions);
+									//t3lib_div::debug('deny role: '.strtolower(trim($roleName)).' resource: '. strtolower(trim($ruleObject)) .' actions: '.implode(',', $actions)."\n");echo "<br />";
+								}
 							}
 						}
 					}
 				} catch(Zend_Acl_Role_Registry_Exception $exception) {
 					throw new Tx_Rbac_Exception_AccessControlServiceException($exception->getMessage());
 				}
-
-				return $acl;
 			}
+
+			return $acl;
 
 		}
 
@@ -127,15 +138,15 @@ class Tx_Rbac_Service_ZendAccessControlService implements Tx_Rbac_Interface_Acce
 			$this->pluginSettings = $settings;
 		}
 		protected function evalOneRbacRule($rbacRule){
-
+			if( !$this->isValidRuleSyntax($rbacRule)) {
+				throw new Tx_Rbac_Exception_AccessControlServiceException('RBAC error: is not valid rule syntax: '. $rbacRule);
+			}
+			t3lib_div::debug($rbacRule);
 		}
 
 		protected function evalAllRbacRules($rbacRules){
 			$isAllowed = TRUE;
 			while (($rbacRule=array_pop($rbacRules)) && $isAllowed == TRUE) {
-				if( !$this->isValidRuleSyntax($rbacRule)) {
-					throw new Tx_Rbac_Exception_AccessControlServiceException('RBAC error: is not valid rule syntax: '. $rbacRule);
-				}
 				$isAllowed = $this->evalOneRbacRule($rbacRule);
 			}
 			return $isAllowed;
