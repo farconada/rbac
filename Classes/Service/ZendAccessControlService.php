@@ -1,6 +1,6 @@
 <?php
 
-class Tx_Rbac_Service_ZendAccessControlService implements Tx_Rbac_AccessControlServiceInterface {
+class Tx_Rbac_Service_ZendAccessControlService implements Tx_Rbac_Interfaces_AccessControlServiceInterface {
 		/*
 		* @var Tx_Extbase_Domain_Repository_FrontendUserRepository
 		*/
@@ -51,11 +51,16 @@ class Tx_Rbac_Service_ZendAccessControlService implements Tx_Rbac_AccessControlS
 			}
 			$this->setFeUser($feUser);
 			$this->userAcl = getUserAcl();
+
 			return $this->evalAllRbacRules($rbacRule);
 		}
 
 		protected function getUserAcl(){
-
+			$ts = NULL;
+			if($GLOBALS['TSFE']->fe_user) {
+				$ts = $GLOBALS['TSFE']->fe_user->getUserTSconf();
+			}
+			t3lib_div::debug($ts);
 		}
 
 		protected function evalOneRbacRule($rbacRule){
