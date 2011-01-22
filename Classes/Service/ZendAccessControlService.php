@@ -56,7 +56,7 @@ class Tx_Rbac_Service_ZendAccessControlService implements Tx_Rbac_Interface_Acce
 		}
 
 		protected function getUserAcl(){
-			$ts = $this->feUser->getUserTSconf();
+			$userTs = $this->feUser->getUserTSconf();
 			//t3lib_div::debug($ts);
 		}
 

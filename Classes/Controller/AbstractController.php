@@ -43,24 +43,20 @@ abstract class Tx_Rbac_Controller_AbstractController extends Tx_Extbase_MVC_Cont
 				$isAllowed = $this->rbacAccessControlService->hasAccess($GLOBALS['TSFE']->fe_user, $methodTags['rbacRule']);
 				if(!$isAllowed) {
 					$this->flashMessages->add('Access denied! You do not have the privileges for this function.');
-					$this->accessDeniedAction();
+					$this->controllerContext = $this->buildControllerContext()->getRequest()->setControllerActionName('accessDenied');
 				}
 
 
 			} else {
 				$this->flashMessages->add('Access denied - You are not logged in!');
-				$this->accessDeniedAction();
+				$this->controllerContext = $this->buildControllerContext()->getRequest()->setControllerActionName('accessDenied');
 			}
-
-
-
 		}
 
 		$this->postInitializeAction();
 	}
 
 	protected function accessDeniedAction() {
-		$this->flashMessages->add('Access denied!');
 	}
 
 	/**
