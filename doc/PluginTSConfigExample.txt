@@ -1,8 +1,9 @@
+// Roles have to be defined in order, this is because parents relations
 plugins.tx_myplugin.settings.rbac.roles {
 	admin {
 		ObjectA {
 			actions = action1,action2
-			allowed = 1
+			allowed = 1 // explicit allow, if "allowed is not set the use allowed=1"
 		}
 
 		// All actions for ObjectB
@@ -15,8 +16,15 @@ plugins.tx_myplugin.settings.rbac.roles {
 			deny = action3
 		}
 
+		//a role can inherit one or more roles in a csv. order implies priority
 		parentRoles =
 
+	}
+
+	guest {
+		ObjectA {
+			actions = action2
+		}
 	}
 
 	editor {
@@ -27,11 +35,7 @@ plugins.tx_myplugin.settings.rbac.roles {
 		parentRoles = guest
 	}
 
-	guest {
-		ObjectA {
-			actions = action2
-		}
-	}
+
 
 }
 
