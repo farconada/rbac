@@ -6,3 +6,15 @@ Roles are applied with the FE user/group TS under the key plugins.tx_pluginname.
 for example plugins.tx_myplugin.settings.rbac.appliedRole = guest (see FeUserTSConfigExample.txt)
 A user only have one role but a role could have several parent.
 The policy is Deny By Default
+
+How to apply in Controller-actions
+----------------------------------------------
+a) your controller have to extend from Tx_Rbac_Controller_AbstractController or implement your own initializeAction() and verify the ACLs with a code similar to the one implemented in Tx_Rbac_Controller_AbstractController
+
+b) you need to tag action with custom phpdoc tags
+"@rbacRule ObjectA > new,edit,delete" 
+you could add as much rules as you want, you need to be allowed for all rules to be able to execute the action
+"@rbacRule ObjectA > *" 
+This means that you have to be allowed for all method in ObjectA. All methods declared in your acl config, not in your controller
+
+c) create an actionDenied template to be displayed when the user is not allowed
