@@ -124,7 +124,7 @@ class Tx_Rbac_Service_ZendAccessControlService implements Tx_Rbac_Interface_Acce
 		protected function buildUserAcl(){
 			$acl = new Zend_Acl();
 			// All roles defined at page and user level
-			//$roles = Tx_Extbase_Utility_Arrays::arrayMergeRecursiveOverrule($this->getPluginRolesFromTS(), $this->getUserRolesFromTS());
+			$roles = Tx_Extbase_Utility_Arrays::arrayMergeRecursiveOverrule($this->getPluginRolesFromTS(), $this->getUserRolesFromTS());
 			t3lib_div:debug($roles);
 			foreach ($roles as $roleName => $roleValues) {
 				try {
@@ -229,7 +229,11 @@ class Tx_Rbac_Service_ZendAccessControlService implements Tx_Rbac_Interface_Acce
 			$isAllowed = TRUE;
 			while (($action=array_pop($rbacRuleActions)) && ($isAllowed == TRUE)) {
 				try {
-					$isAllowed = $this->userAcl->isAllowed($appliedRole,$rbacRuleObject,$action );
+					if ($action == '*') {
+						$isAllowed = $this->userAcl->isAllowed($appliedRole,$rbacRuleObject);
+					} else {
+						$isAllowed = $this->userAcl->isAllowed($appliedRole,$rbacRuleObject,$action );
+					}
 				} catch(Zend_Acl_Exception $exception) {
 					// If the resource is not defined the return FALSE
 					if (preg_match('/Resource .* not found/', $exception->getMessage())) {
