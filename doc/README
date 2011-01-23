@@ -1,0 +1,8 @@
+Role definition
+-----------------------------------------------
+Roles are defined in TypoScript, page TS and FE user/groups TS
+Roles are defined under the key plugins.tx_pluginname.settings.rbac.roles (see PluginTSConfigExample.txt)
+Roles are applied with the FE user/group TS under the key plugins.tx_pluginname.settings.rbac.appliedRole
+for example plugins.tx_myplugin.settings.rbac.appliedRole = guest (see FeUserTSConfigExample.txt)
+A user only have one role but a role could have several parent.
+The policy is Deny By Default
