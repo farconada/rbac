@@ -16,6 +16,7 @@ class Tx_Rbac_Service_ZendAccessControlService implements Tx_Rbac_Interface_Acce
 
 		protected $pluginSettings;
 
+
 		/**
 		* Gets a string with the resource object
 		* @param string $rbacRule "@rbacRule ObjectA > new,edit,delete"
@@ -59,7 +60,6 @@ class Tx_Rbac_Service_ZendAccessControlService implements Tx_Rbac_Interface_Acce
 			}
 			$this->setFeUser($feUser);
 			$this->userAcl = $this->getUserAcl();
-
 			return $this->evalAllRbacRules($rbacRule);
 		}
 
@@ -80,11 +80,21 @@ class Tx_Rbac_Service_ZendAccessControlService implements Tx_Rbac_Interface_Acce
 				return array();
 			}
 		}
+		private function getAppliedRoles() {
+			$userTs = $this->feUser->getUserTSconf();
+			//t3lib_div::debug($userTs['plugin.']['tx_'.$this->extensionName.'.']['settings.']);
+			$appliedRoles = Tx_Extbase_Utility_Arrays::trimExplode(',', $userTs['plugin.']['tx_'.$this->extensionName.'.']['settings.']['rbac.']['applyRoles'],TRUE);
+			$result = array();
+			foreach($appliedRoles as $role){
+				$result[] = strtolower(trim($role));
+			}
+			return $result;
+		}
 
 		protected function getUserAcl(){
 			$acl = new Zend_Acl();
 			$roles = Tx_Extbase_Utility_Arrays::arrayMergeRecursiveOverrule($this->getPluginRolesFromTS(), $this->getUserRolesFromTS());
-			//t3lib_div::debug($roles);
+			t3lib_div::debug($roles);
 			foreach ($roles as $roleName => $roleValues) {
 				try {
 					// create the roles
@@ -126,6 +136,7 @@ class Tx_Rbac_Service_ZendAccessControlService implements Tx_Rbac_Interface_Acce
 				}
 			}
 
+			$this->userAcl = $acl;
 			return $acl;
 
 		}
@@ -141,7 +152,20 @@ class Tx_Rbac_Service_ZendAccessControlService implements Tx_Rbac_Interface_Acce
 			if( !$this->isValidRuleSyntax($rbacRule)) {
 				throw new Tx_Rbac_Exception_AccessControlServiceException('RBAC error: is not valid rule syntax: '. $rbacRule);
 			}
-			t3lib_div::debug($rbacRule);
+			$rbacRuleObject = $this->getRbacObjectFromRule($rbacRule);
+			$rbacRuleActions = $this->getRbacActionsFromRule($rbacRule);
+			$appliedRole = array_pop($this->getAppliedRoles()); // Retrieve all applied roles but only use the first one
+
+			$isAllowed = FALSE;
+			while (($action=array_pop($rbacRuleActions)) && ($isAllowed == FALSE)) {
+				try {
+					$isAllowed = $this->userAcl->isAllowed($appliedRole,$rbacRuleObject,$action );
+				} catch(Zend_Acl_Role_Registry_Exception $exception) {
+					throw new Tx_Rbac_Exception_AccessControlServiceException($exception->getMessage());
+				}
+			}
+			//t3lib_div::debug($this->userAcl);
+			return $isAllowed;
 		}
 
 		protected function evalAllRbacRules($rbacRules){
