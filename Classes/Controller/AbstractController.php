@@ -38,6 +38,7 @@ abstract class Tx_Rbac_Controller_AbstractController extends Tx_Extbase_MVC_Cont
 		$action = $this->actionMethodName;
 		$methodTags = $this->reflectionService->getMethodTagsValues($controller, $action);
 
+		// ---------- RBAC BEGIN --------------------------
 		if (array_key_exists('rbacRule', $methodTags)) {
 			if ($GLOBALS['TSFE']->fe_user->user['uid'] > 0) {
 				// @rbacRule ObjectA > new,edit,delete
@@ -55,6 +56,7 @@ abstract class Tx_Rbac_Controller_AbstractController extends Tx_Extbase_MVC_Cont
 				$this->buildControllerContext()->getRequest()->setControllerActionName('accessDenied');
 			}
 		}
+		// ---------- RBAC END --------------------------
 
 		$this->postInitializeAction();
 	}

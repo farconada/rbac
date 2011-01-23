@@ -125,7 +125,7 @@ class Tx_Rbac_Service_ZendAccessControlService implements Tx_Rbac_Interface_Acce
 			$acl = new Zend_Acl();
 			// All roles defined at page and user level
 			$roles = Tx_Extbase_Utility_Arrays::arrayMergeRecursiveOverrule($this->getPluginRolesFromTS(), $this->getUserRolesFromTS());
-			t3lib_div:debug($roles);
+			//t3lib_div:debug($roles);
 			foreach ($roles as $roleName => $roleValues) {
 				try {
 					// create the roles
