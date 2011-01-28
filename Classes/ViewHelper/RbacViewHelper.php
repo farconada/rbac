@@ -22,16 +22,19 @@ class Tx_Rbac_ViewHelper_RbacViewHelper extends Tx_Fluid_Core_ViewHelper_Abstrac
 	public function render($settings) {
 		$xmlString = $this->renderChildren();
 		$xml = new SimpleXMLElement($xmlString);
-		$rbacRules = $xml->rule;
-		$htmlIfDenied = $xml->htmlIfDenied;
-		$htmlIfAllowed = $xml>htmlIfAllowed;
+		$rbacRules = array();
+		foreach ($xml->rules->rule as $rule) {
+			$rbacRules[] = $rule;
+		}
+		$htmlIfDenied = $xml->htmlIfDenied->children()->asXML();
+		$htmlIfAllowed = $xml->htmlIfAllowed->children()->asXML();
 
 		try {
 			$this->rbacAccessControlService->setExtensionName($this->controllerContext->getRequest()->getControllerExtensionName());
 			$this->rbacAccessControlService->setPluginSettings($settings);
 			if ($this->fe_user->user['uid'] > 0) {
 				$isAllowed = $this->rbacAccessControlService->hasAccess($this->fe_user, $rbacRules);
-				if(!$isAllowed) {
+				if (!$isAllowed) {
 					return $htmlIfDenied;
 				} else {
 					return $htmlIfAllowed;
