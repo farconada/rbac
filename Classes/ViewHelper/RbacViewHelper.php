@@ -12,19 +12,21 @@ class Tx_Rbac_ViewHelper_RbacViewHelper extends Tx_Fluid_Core_ViewHelper_Abstrac
 	*/
 	protected $feUser;
 
-	public function __construct() {
-		parent::__construct();
+	/**
+	 * checks ACLs
+	 *
+	 * @param array $settings
+	 */
+	public function render($settings = '') {
 		$accessControlService = t3lib_div::makeInstance('Tx_Rbac_Service_ZendAccessControlService');
 		$this->rbacAccessControlService = $accessControlService;
 		$this->feUser = $GLOBALS['TSFE']->fe_user;
-	}
 
-	public function render($settings) {
 		$xmlString = $this->renderChildren();
-		$xml = new SimpleXMLElement($xmlString);
+		$xml = new SimpleXMLElement('<object>'.$xmlString.'</object>');
 		$rbacRules = array();
 		foreach ($xml->rules->rule as $rule) {
-			$rbacRules[] = $rule;
+			$rbacRules[] = $rule.'';
 		}
 		$htmlIfDenied = $xml->htmlIfDenied->children()->asXML();
 		$htmlIfAllowed = $xml->htmlIfAllowed->children()->asXML();
@@ -32,14 +34,18 @@ class Tx_Rbac_ViewHelper_RbacViewHelper extends Tx_Fluid_Core_ViewHelper_Abstrac
 		try {
 			$this->rbacAccessControlService->setExtensionName($this->controllerContext->getRequest()->getControllerExtensionName());
 			$this->rbacAccessControlService->setPluginSettings($settings);
-			if ($this->fe_user->user['uid'] > 0) {
-				$isAllowed = $this->rbacAccessControlService->hasAccess($this->fe_user, $rbacRules);
+			if ($this->feUser->user['uid'] > 0) {
+				$isAllowed = $this->rbacAccessControlService->hasAccess($this->feUser, $rbacRules);
 				if (!$isAllowed) {
 					return $htmlIfDenied;
 				} else {
 					return $htmlIfAllowed;
 				}
+			} else {
+					// No Login then Denied
+				return $htmlIfDenied;
 			}
+
 		} catch (Tx_Rbac_Exception_AccessControlServiceException $exception) {
 			return $exception->getMessage();
 		}
