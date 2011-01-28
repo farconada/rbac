@@ -1,10 +1,13 @@
+// Role definition at user level
 plugins.tx_myplugin.settings.rbac.roles {
 	custonRole {
 		ObjectA {
 					actions = action1
-					allowed = 0
+					allowed = 0 //explicit deny for action1
 				}
 	}
 }
 
-plugins.tx_myplugin.settings.rbac.applyRoles = guest, editor, customRole
+// you can apply only one role but one role could have a lot of parents
+// parents order in a role definition is the priority
+plugins.tx_myplugin.settings.rbac.appliedRole = guest
