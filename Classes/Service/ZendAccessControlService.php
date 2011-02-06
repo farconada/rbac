@@ -236,7 +236,7 @@ class Tx_Rbac_Service_ZendAccessControlService implements Tx_Rbac_Interface_Acce
 					}
 				} catch(Zend_Acl_Exception $exception) {
 					// If the resource is not defined the return FALSE
-					if (preg_match('/Resource .* not found/', $exception->getMessage())) {
+					if (preg_match('/Resource .* not found/', $exception->getMessage()) || preg_match('/Role .* not found/', $exception->getMessage())) {
 						return FALSE;
 					}
 					throw new Tx_Rbac_Exception_AccessControlServiceException($exception->getMessage());
