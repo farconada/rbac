@@ -48,7 +48,7 @@ class Tx_Rbac_Service_ZendAccessControlService implements Tx_Rbac_Interface_Acce
 				$actionsArray = preg_split('/,/',$ruleArray[1]);
 				foreach ($actionsArray as $actions) {
 					if (trim($actions)) {
-						$actionsResult[] = strtolower(trim($actions));
+						$actionsResult[] = trim($actions);
 					}
 				}
 			}
